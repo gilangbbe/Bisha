@@ -5,6 +5,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Concept } from "@/types";
 import { getConceptsByIds, getAllConcepts } from "@/lib/concepts";
 import CategoryBadge from "@/components/CategoryBadge";
+import MicroTutorial from "@/components/MicroTutorial";
+import { microTutorials } from "@/lib/tutorials";
 import Link from "next/link";
 
 function CompareContent() {
@@ -16,6 +18,8 @@ function CompareContent() {
     const [loading, setLoading] = useState(true);
     const [showPicker, setShowPicker] = useState(false);
     const [pickerSearch, setPickerSearch] = useState("");
+    const [showMicroTutorial, setShowMicroTutorial] = useState(false);
+    const [microDismissed, setMicroDismissed] = useState(false);
 
     useEffect(() => {
         async function load() {
@@ -190,20 +194,45 @@ function CompareContent() {
 
             {/* Comparison table */}
             {concepts.length < 2 ? (
-                <div
-                    style={{
-                        textAlign: "center",
-                        padding: "48px 16px",
-                        color: "#5a5a78",
-                    }}
-                >
-                    <p style={{ fontSize: "16px", marginBottom: "8px" }}>
-                        Select at least 2 concepts to compare
-                    </p>
-                    <p style={{ fontSize: "13px" }}>
-                        Use the + Add button above, or go to Browse and select concepts there
-                    </p>
-                </div>
+                <>
+                    <div
+                        style={{
+                            textAlign: "center",
+                            padding: "48px 16px",
+                            color: "#5a5a78",
+                        }}
+                        ref={(el) => {
+                            if (el && !showMicroTutorial && !microDismissed && concepts.length === 0 && !loading) {
+                                setShowMicroTutorial(true);
+                            }
+                        }}
+                    >
+                        <p style={{ fontSize: "16px", marginBottom: "8px" }}>
+                            Select at least 2 concepts to compare
+                        </p>
+                        <p style={{ fontSize: "13px" }}>
+                            Use the + Add button above, or go to Browse and select concepts there
+                        </p>
+                        <Link
+                            href="/learn/comparing-examiner"
+                            style={{
+                                display: "inline-block",
+                                marginTop: "16px",
+                                fontSize: "13px",
+                                color: "#818cf8",
+                                textDecoration: "none",
+                            }}
+                        >
+                            💡 Learn how to compare like an examiner →
+                        </Link>
+                    </div>
+                    {showMicroTutorial && !microDismissed && (
+                        <MicroTutorial
+                            tutorial={microTutorials.find((m) => m.trigger === "empty-compare")!}
+                            onDismiss={() => { setMicroDismissed(true); setShowMicroTutorial(false); }}
+                        />
+                    )}
+                </>
             ) : (
                 <div
                     style={{

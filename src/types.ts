@@ -88,3 +88,29 @@ export const PROCESS_TYPE_COLORS: Record<ProcessType, string> = {
     [ProcessType.DECISION]: "#f59e0b",
     [ProcessType.CYCLICAL]: "#10b981",
 };
+
+// ── Tutorial & Learning Guidance Module ──
+
+export interface TutorialExample {
+    label: "Good" | "Bad";
+    content: string;
+    explanation?: string;
+}
+
+export interface TutorialCard {
+    id: string;
+    title: string;
+    message: string;
+    exampleGood?: TutorialExample;
+    exampleBad?: TutorialExample;
+    ctaLabel?: string;
+    ctaAction?: string; // route to navigate to
+}
+
+export interface TutorialTrack {
+    id: string;
+    title: string;
+    description: string;
+    icon: string;
+    cards: TutorialCard[];
+}

@@ -5,6 +5,7 @@ import { Concept, ConceptCategory, CATEGORY_LABELS } from "@/types";
 import { getAllConcepts } from "@/lib/concepts";
 import ConceptCard from "@/components/ConceptCard";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function HomePage() {
     const router = useRouter();
@@ -61,6 +62,20 @@ export default function HomePage() {
                 <p style={{ fontSize: "14px", color: "#9595b0" }}>
                     Banking concepts, clearly differentiated
                 </p>
+                <Link
+                    href="/learn"
+                    style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "4px",
+                        marginTop: "8px",
+                        fontSize: "13px",
+                        color: "#818cf8",
+                        textDecoration: "none",
+                    }}
+                >
+                    💡 Help me study better →
+                </Link>
             </div>
 
             {/* Search */}
