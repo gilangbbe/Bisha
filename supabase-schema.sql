@@ -93,3 +93,66 @@ VALUES
     'Exams may ask about RM vs. Financial Advisor — RM is bank-side relationship, FA gives investment advice (may need certification).',
     ARRAY[]::UUID[]
   );
+
+-- ═══════════════════════════════════════════════════════════
+-- Process Visualization Module
+-- ═══════════════════════════════════════════════════════════
+
+CREATE TABLE IF NOT EXISTS processes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title TEXT NOT NULL,
+  process_type TEXT NOT NULL CHECK (process_type IN ('LINEAR', 'DECISION', 'CYCLICAL')),
+  trigger TEXT NOT NULL DEFAULT '',
+  outcome TEXT NOT NULL DEFAULT '',
+  steps JSONB NOT NULL DEFAULT '[]',
+  exam_trap_alert TEXT,
+  confused_with UUID[] NOT NULL DEFAULT '{}',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE processes ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow all access on processes" ON processes
+  FOR ALL
+  USING (true)
+  WITH CHECK (true);
+
+CREATE INDEX IF NOT EXISTS idx_processes_type ON processes(process_type);
+
+-- Seed data: sample banking processes
+INSERT INTO processes (id, title, process_type, trigger, outcome, steps, exam_trap_alert, confused_with)
+VALUES
+  (
+    'f1a2b3c4-d5e6-7890-abcd-111111111111',
+    'Loan Approval Process (Retail)',
+    'DECISION',
+    'Customer submits a retail loan application at the branch or online.',
+    'Loan is either approved and disbursed, or rejected with documented reasons.',
+    '[
+      {"id": "s1", "order": 1, "action": "Customer submits loan application with required documents.", "actor": "Customer"},
+      {"id": "s2", "order": 2, "action": "Branch officer verifies KYC and document completeness.", "actor": "Branch Officer"},
+      {"id": "s3", "order": 3, "action": "Credit check performed against bureau records.", "actor": "Credit Analyst", "decision": {"question": "Does credit score meet minimum threshold?", "optionA": {"label": "Yes", "nextStepId": "s4"}, "optionB": {"label": "No", "nextStepId": "s6"}}},
+      {"id": "s4", "order": 4, "action": "Risk assessment and collateral evaluation completed.", "actor": "Risk Officer"},
+      {"id": "s5", "order": 5, "action": "Loan approved and funds disbursed to customer account.", "actor": "Branch Manager", "notes": "Approval authority depends on loan amount tier."},
+      {"id": "s6", "order": 6, "action": "Application rejected with formal rejection letter.", "actor": "Branch Officer", "notes": "Customer may re-apply after 6 months with improved score."}
+    ]'::JSONB,
+    'Exams often ask who has final approval authority — it depends on loan amount tiers, not always the branch manager.',
+    ARRAY['f1a2b3c4-d5e6-7890-abcd-222222222222']::UUID[]
+  ),
+  (
+    'f1a2b3c4-d5e6-7890-abcd-222222222222',
+    'Credit Card Issuance',
+    'LINEAR',
+    'Customer applies for a credit card via branch, online, or pre-approved offer.',
+    'Credit card is issued, activated, and delivered to the customer.',
+    '[
+      {"id": "s1", "order": 1, "action": "Customer fills credit card application form.", "actor": "Customer"},
+      {"id": "s2", "order": 2, "action": "Income verification and employment check performed.", "actor": "Verification Team"},
+      {"id": "s3", "order": 3, "action": "Credit limit determined based on income and bureau score.", "actor": "Credit Analyst", "notes": "Pre-approved customers may skip this step."},
+      {"id": "s4", "order": 4, "action": "Card manufactured and shipped to branch or customer address.", "actor": "Card Operations"},
+      {"id": "s5", "order": 5, "action": "Customer activates card via phone or online banking.", "actor": "Customer"}
+    ]'::JSONB,
+    'Don''t confuse credit card issuance with loan approval — credit cards are revolving credit with no fixed tenure.',
+    ARRAY['f1a2b3c4-d5e6-7890-abcd-111111111111']::UUID[]
+  );

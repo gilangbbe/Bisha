@@ -38,3 +38,53 @@ export const CATEGORY_LABELS: Record<ConceptCategory, string> = {
     [ConceptCategory.POLICY]: "Policy",
     [ConceptCategory.OTHER]: "Other",
 };
+
+// ── Process Visualization Module ──
+
+export enum ProcessType {
+    LINEAR = "LINEAR",
+    DECISION = "DECISION",
+    CYCLICAL = "CYCLICAL",
+}
+
+export interface Decision {
+    question: string;
+    optionA: { label: string; nextStepId: string };
+    optionB: { label: string; nextStepId: string };
+}
+
+export interface Step {
+    id: string;
+    order: number;
+    action: string;
+    actor?: string;
+    decision?: Decision;
+    notes?: string;
+}
+
+export interface Process {
+    id: string;
+    title: string;
+    process_type: ProcessType;
+    trigger: string;
+    outcome: string;
+    steps: Step[];
+    exam_trap_alert: string | null;
+    confused_with: string[];
+    created_at: string;
+    updated_at: string;
+}
+
+export type ProcessFormData = Omit<Process, "id" | "created_at" | "updated_at">;
+
+export const PROCESS_TYPE_LABELS: Record<ProcessType, string> = {
+    [ProcessType.LINEAR]: "Linear",
+    [ProcessType.DECISION]: "Decision",
+    [ProcessType.CYCLICAL]: "Cyclical",
+};
+
+export const PROCESS_TYPE_COLORS: Record<ProcessType, string> = {
+    [ProcessType.LINEAR]: "#3b82f6",
+    [ProcessType.DECISION]: "#f59e0b",
+    [ProcessType.CYCLICAL]: "#10b981",
+};

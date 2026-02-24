@@ -6,13 +6,28 @@ import { usePathname } from "next/navigation";
 const navItems = [
     {
         href: "/",
-        label: "Browse",
+        label: "Concepts",
         icon: (active: boolean) => (
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? "#6366f1" : "#9595b0"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <rect x="3" y="3" width="7" height="7" rx="1.5" />
                 <rect x="14" y="3" width="7" height="7" rx="1.5" />
                 <rect x="3" y="14" width="7" height="7" rx="1.5" />
                 <rect x="14" y="14" width="7" height="7" rx="1.5" />
+            </svg>
+        ),
+    },
+    {
+        href: "/processes",
+        label: "Processes",
+        icon: (active: boolean) => (
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={active ? "#6366f1" : "#9595b0"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="4" r="2" />
+                <line x1="12" y1="6" x2="12" y2="10" />
+                <circle cx="12" cy="12" r="2" />
+                <line x1="12" y1="14" x2="12" y2="18" />
+                <circle cx="12" cy="20" r="2" />
+                <line x1="14" y1="12" x2="20" y2="12" />
+                <circle cx="22" cy="12" r="2" />
             </svg>
         ),
     },
