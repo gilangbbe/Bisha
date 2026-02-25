@@ -47,10 +47,62 @@ export enum ProcessType {
     CYCLICAL = "CYCLICAL",
 }
 
+export interface DecisionOption {
+    id: string;
+    label: string;
+    steps: Step[];
+}
+
 export interface Decision {
     question: string;
-    optionA: { label: string; nextStepId: string };
-    optionB: { label: string; nextStepId: string };
+    options: DecisionOption[];
+}
+
+// Max branches per decision (product principle: low cognitive load)
+export const MAX_DECISION_OPTIONS = 6;
+export const MIN_DECISION_OPTIONS = 2;
+
+// Max nesting depth for decisions-within-decisions
+export const MAX_DECISION_DEPTH = 3;
+
+// Color palette for decision branches (used in visualizations)
+export const DECISION_BRANCH_COLORS = [
+    "#10b981", // green
+    "#ef4444", // red
+    "#3b82f6", // blue
+    "#f59e0b", // amber
+    "#8b5cf6", // purple
+    "#ec4899", // pink
+];
+
+// ── Tree helpers ──
+
+/** Recursively count all steps (including nested branch steps) */
+export function countAllSteps(steps: Step[]): number {
+    let count = 0;
+    for (const step of steps) {
+        count += 1;
+        if (step.decision) {
+            for (const opt of step.decision.options) {
+                count += countAllSteps(opt.steps);
+            }
+        }
+    }
+    return count;
+}
+
+/** Recursively collect all decision questions from a step tree */
+export function collectDecisions(steps: Step[], depth = 0): { question: string; branchCount: number; depth: number }[] {
+    const results: { question: string; branchCount: number; depth: number }[] = [];
+    for (const step of steps) {
+        if (step.decision) {
+            results.push({ question: step.decision.question, branchCount: step.decision.options.length, depth });
+            for (const opt of step.decision.options) {
+                results.push(...collectDecisions(opt.steps, depth + 1));
+            }
+        }
+    }
+    return results;
 }
 
 export interface Step {

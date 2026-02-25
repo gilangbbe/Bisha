@@ -1,6 +1,6 @@
 "use client";
 
-import { Step } from "@/types";
+import { Step, DECISION_BRANCH_COLORS } from "@/types";
 import { useMemo } from "react";
 
 interface FlowchartViewProps {
@@ -9,11 +9,12 @@ interface FlowchartViewProps {
     zoomLevel: 1 | 2 | 3;
 }
 
-const NODE_W = 260;
-const NODE_H = 56;
-const DECISION_H = 60;
-const GAP_Y = 48;
-const BRANCH_X_OFFSET = 160;
+const NODE_W = 220;
+const NODE_H = 52;
+const DECISION_H = 58;
+const GAP_Y = 40;
+const BRANCH_GAP_X = 40;
+const NOTE_H = 28;
 
 interface LayoutNode {
     id: string;
@@ -21,15 +22,12 @@ interface LayoutNode {
     y: number;
     width: number;
     height: number;
-    type: "step" | "decision";
+    type: "step" | "decision" | "notes" | "branchLabel";
     label: string;
     secondaryLabel?: string;
     actor?: string;
-    notes?: string;
-    optionALabel?: string;
-    optionBLabel?: string;
-    branchTargetA?: string;
-    branchTargetB?: string;
+    color?: string;
+    depth: number;
 }
 
 interface LayoutEdge {
@@ -38,116 +36,245 @@ interface LayoutEdge {
     toX: number;
     toY: number;
     label?: string;
+    color?: string;
     curved?: boolean;
-    controlPoints?: { x: number; y: number }[];
+    dashed?: boolean;
 }
 
-function layoutNodes(steps: Step[], zoomLevel: 1 | 2 | 3): { nodes: LayoutNode[]; edges: LayoutEdge[]; totalHeight: number; totalWidth: number } {
+interface LayoutResult {
+    nodes: LayoutNode[];
+    edges: LayoutEdge[];
+    width: number;
+    height: number;
+}
+
+/**
+ * Recursively layout a sequence of steps as a vertical column.
+ * Returns the nodes, edges, bounding width, and height consumed.
+ * The column is laid out starting at (left, top) with centerX calculated internally.
+ */
+function layoutStepSequence(
+    steps: Step[],
+    startX: number,
+    startY: number,
+    zoomLevel: 1 | 2 | 3,
+    depth: number,
+    idPrefix: string,
+): LayoutResult {
     const nodes: LayoutNode[] = [];
     const edges: LayoutEdge[] = [];
-    const centerX = 300;
-    let y = 30;
+    let y = startY;
+    let maxWidth = NODE_W;
 
     const filteredSteps = steps.filter((s) => {
-        if (zoomLevel === 1) return !s.decision;
+        if (zoomLevel === 1 && depth === 0) return !s.decision;
         return true;
     });
 
     for (let i = 0; i < filteredSteps.length; i++) {
         const step = filteredSteps[i];
         const hasDecision = step.decision && zoomLevel >= 2;
+        const nodeId = `${idPrefix}-${step.id}`;
 
-        const node: LayoutNode = {
-            id: step.id,
-            x: centerX - NODE_W / 2,
+        // Place the step node (will be repositioned once we know column width)
+        const nodeH = hasDecision ? DECISION_H : NODE_H;
+        const stepNode: LayoutNode = {
+            id: nodeId,
+            x: 0, // placeholder — repositioned later
             y,
             width: NODE_W,
-            height: hasDecision ? DECISION_H : NODE_H,
+            height: nodeH,
             type: hasDecision ? "decision" : "step",
             label: step.action,
+            secondaryLabel: hasDecision ? step.decision!.question : undefined,
             actor: step.actor,
-            notes: zoomLevel >= 3 ? step.notes : undefined,
+            depth,
         };
+        nodes.push(stepNode);
 
-        if (hasDecision && step.decision) {
-            node.secondaryLabel = step.decision.question;
-            node.optionALabel = step.decision.optionA.label;
-            node.optionBLabel = step.decision.optionB.label;
-            node.branchTargetA = step.decision.optionA.nextStepId;
-            node.branchTargetB = step.decision.optionB.nextStepId;
-        }
+        const stepBottomY = y + nodeH;
 
-        nodes.push(node);
-
-        // Notes node below step if zoom level 3
+        // Notes
         if (zoomLevel >= 3 && step.notes) {
-            y += node.height + 8;
+            const noteY = stepBottomY + 6;
             nodes.push({
-                id: `${step.id}-notes`,
-                x: centerX - NODE_W / 2 + 20,
-                y,
-                width: NODE_W - 40,
-                height: 32,
-                type: "step",
+                id: `${nodeId}-notes`,
+                x: 0,
+                y: noteY,
+                width: NODE_W - 30,
+                height: NOTE_H,
+                type: "notes",
                 label: step.notes,
+                depth,
             });
-            y += 32;
+            y = noteY + NOTE_H + GAP_Y;
+        } else {
+            y = stepBottomY + GAP_Y;
         }
 
-        // Edge to next node
-        if (i < filteredSteps.length - 1) {
-            const nextY = y + node.height + GAP_Y;
+        // Branches for decisions
+        if (hasDecision && step.decision) {
+            const branchResults: LayoutResult[] = [];
+            const options = step.decision.options;
 
-            if (hasDecision && step.decision) {
-                // Branch edges
-                edges.push({
-                    fromX: centerX - NODE_W / 2,
-                    fromY: y + node.height / 2,
-                    toX: centerX - BRANCH_X_OFFSET,
-                    toY: nextY,
-                    label: step.decision.optionA.label,
-                    curved: true,
-                    controlPoints: [
-                        { x: centerX - BRANCH_X_OFFSET, y: y + node.height / 2 },
-                    ],
-                });
-                edges.push({
-                    fromX: centerX + NODE_W / 2,
-                    fromY: y + node.height / 2,
-                    toX: centerX + BRANCH_X_OFFSET,
-                    toY: nextY,
-                    label: step.decision.optionB.label,
-                    curved: true,
-                    controlPoints: [
-                        { x: centerX + BRANCH_X_OFFSET, y: y + node.height / 2 },
-                    ],
-                });
+            // Layout each branch
+            for (let oi = 0; oi < options.length; oi++) {
+                const opt = options[oi];
+                if (opt.steps.length > 0) {
+                    const branchResult = layoutStepSequence(
+                        opt.steps,
+                        0, // x offset computed later
+                        y + 24, // leave room for branch label
+                        zoomLevel,
+                        depth + 1,
+                        `${nodeId}-b${oi}`,
+                    );
+                    branchResults.push(branchResult);
+                } else {
+                    branchResults.push({ nodes: [], edges: [], width: NODE_W * 0.6, height: 0 });
+                }
             }
 
-            edges.push({
-                fromX: centerX,
-                fromY: y + node.height,
-                toX: centerX,
-                toY: nextY,
-            });
+            // Calculate total branches width
+            const totalBranchWidth = branchResults.reduce((sum, r) => sum + r.width, 0) + BRANCH_GAP_X * (branchResults.length - 1);
+            maxWidth = Math.max(maxWidth, totalBranchWidth);
+
+            // Position branches side by side, centered under the decision
+            let branchX = 0;
+            for (let oi = 0; oi < options.length; oi++) {
+                const opt = options[oi];
+                const br = branchResults[oi];
+                const branchColor = DECISION_BRANCH_COLORS[oi % DECISION_BRANCH_COLORS.length];
+                const branchCenterX = branchX + br.width / 2;
+
+                // Branch label
+                nodes.push({
+                    id: `${nodeId}-blabel${oi}`,
+                    x: branchCenterX - 40,
+                    y: y,
+                    width: 80,
+                    height: 20,
+                    type: "branchLabel",
+                    label: opt.label || `Branch ${oi + 1}`,
+                    color: branchColor,
+                    depth: depth + 1,
+                });
+
+                // Edge from decision node to branch label
+                edges.push({
+                    fromX: 0, // repositioned later
+                    fromY: stepBottomY,
+                    toX: branchCenterX,
+                    toY: y,
+                    label: undefined,
+                    color: branchColor,
+                    curved: true,
+                });
+
+                // Add branch nodes/edges (offset by branchX)
+                for (const n of br.nodes) {
+                    nodes.push({ ...n, x: n.x + branchX });
+                }
+                for (const e of br.edges) {
+                    edges.push({ ...e, fromX: e.fromX + branchX, toX: e.toX + branchX });
+                }
+
+                // Edge from branch label to first branch step
+                if (br.nodes.length > 0) {
+                    edges.push({
+                        fromX: branchCenterX,
+                        fromY: y + 20,
+                        toX: branchCenterX,
+                        toY: y + 24,
+                        color: branchColor,
+                    });
+                }
+
+                branchX += br.width + BRANCH_GAP_X;
+            }
+
+            // Calculate max branch depth
+            const maxBranchHeight = Math.max(...branchResults.map((r) => r.height), 0);
+            y = y + 24 + maxBranchHeight + GAP_Y;
+
+            // Reconnect edge: dashed line to next node after branches
+            if (i < filteredSteps.length - 1) {
+                // Will be handled below
+            }
         }
 
-        y += node.height + GAP_Y;
+        // Edge to next step
+        if (i < filteredSteps.length - 1) {
+            edges.push({
+                fromX: 0, // repositioned later (centered)
+                fromY: y - GAP_Y,
+                toX: 0,
+                toY: y,
+                dashed: !!hasDecision,
+            });
+        }
+    }
+
+    // Now center all nodes/edges horizontally within maxWidth
+    const centerX = maxWidth / 2;
+    for (const node of nodes) {
+        if (node.type === "branchLabel") {
+            // Already positioned
+        } else if (node.id.includes("-b")) {
+            // Branch nodes — already positioned
+        } else {
+            node.x = centerX - node.width / 2;
+        }
+    }
+    // Fix edge endpoints that were left at 0 (decision → branch, step → step)
+    for (const edge of edges) {
+        if (edge.fromX === 0 && !edge.curved) edge.fromX = centerX;
+        if (edge.toX === 0 && !edge.curved) edge.toX = centerX;
+        if (edge.curved && edge.fromX === 0) edge.fromX = centerX;
     }
 
     return {
         nodes,
         edges,
-        totalHeight: y + 20,
-        totalWidth: centerX * 2,
+        width: maxWidth,
+        height: y - startY,
     };
 }
 
 export default function FlowchartView({ steps, title, zoomLevel }: FlowchartViewProps) {
-    const { nodes, edges, totalHeight, totalWidth } = useMemo(
-        () => layoutNodes(steps, zoomLevel),
-        [steps, zoomLevel]
-    );
+    const { nodes, edges, totalWidth, totalHeight } = useMemo(() => {
+        const result = layoutStepSequence(steps, 0, 40, zoomLevel, 0, "root");
+        const padding = 40;
+        // Find actual bounds
+        let minX = Infinity, maxX = -Infinity, minY = 0, maxY = -Infinity;
+        for (const n of result.nodes) {
+            minX = Math.min(minX, n.x);
+            maxX = Math.max(maxX, n.x + n.width);
+            maxY = Math.max(maxY, n.y + n.height);
+        }
+        if (result.nodes.length === 0) {
+            return { nodes: [], edges: [], totalWidth: 600, totalHeight: 100 };
+        }
+        // Offset everything so it fits within the SVG
+        const offsetX = -minX + padding;
+        const offsetY = padding;
+        for (const n of result.nodes) {
+            n.x += offsetX;
+            n.y += offsetY;
+        }
+        for (const e of result.edges) {
+            e.fromX += offsetX;
+            e.fromY += offsetY;
+            e.toX += offsetX;
+            e.toY += offsetY;
+        }
+        return {
+            nodes: result.nodes,
+            edges: result.edges,
+            totalWidth: maxX - minX + padding * 2,
+            totalHeight: maxY + padding * 2,
+        };
+    }, [steps, zoomLevel]);
 
     if (steps.length === 0) {
         return (
@@ -185,106 +312,93 @@ export default function FlowchartView({ steps, title, zoomLevel }: FlowchartView
                 </text>
 
                 {/* Edges */}
-                {edges.map((edge, i) => (
-                    <g key={`edge-${i}`}>
-                        {edge.curved && edge.controlPoints ? (
-                            <path
-                                d={`M ${edge.fromX} ${edge.fromY} Q ${edge.controlPoints[0].x} ${edge.controlPoints[0].y} ${edge.toX} ${edge.toY}`}
-                                fill="none"
-                                stroke="#6366f1"
-                                strokeWidth="1.5"
-                                opacity={0.4}
-                                markerEnd="url(#arrowhead)"
-                            />
-                        ) : (
-                            <line
-                                x1={edge.fromX}
-                                y1={edge.fromY}
-                                x2={edge.toX}
-                                y2={edge.toY}
-                                stroke="#6366f1"
-                                strokeWidth="1.5"
-                                opacity={0.4}
-                                markerEnd="url(#arrowhead)"
-                            />
-                        )}
-                        {edge.label && (
-                            <text
-                                x={(edge.fromX + edge.toX) / 2 + (edge.toX > edge.fromX ? 8 : -8)}
-                                y={(edge.fromY + edge.toY) / 2}
-                                textAnchor="middle"
-                                fill="#f59e0b"
-                                fontSize="10"
-                                fontWeight="600"
-                                fontFamily="var(--font-sans)"
-                            >
-                                {edge.label}
-                            </text>
-                        )}
-                    </g>
-                ))}
+                {edges.map((edge, i) => {
+                    const midY = (edge.fromY + edge.toY) / 2;
+                    return (
+                        <g key={`edge-${i}`}>
+                            {edge.curved ? (
+                                <path
+                                    d={`M ${edge.fromX} ${edge.fromY} C ${edge.fromX} ${midY}, ${edge.toX} ${midY}, ${edge.toX} ${edge.toY}`}
+                                    fill="none"
+                                    stroke={edge.color || "#6366f1"}
+                                    strokeWidth="1.5"
+                                    opacity={0.5}
+                                    markerEnd="url(#arrowhead)"
+                                />
+                            ) : (
+                                <line
+                                    x1={edge.fromX}
+                                    y1={edge.fromY}
+                                    x2={edge.toX}
+                                    y2={edge.toY}
+                                    stroke={edge.color || "#6366f1"}
+                                    strokeWidth="1.5"
+                                    opacity={0.4}
+                                    strokeDasharray={edge.dashed ? "4 3" : undefined}
+                                    markerEnd="url(#arrowhead)"
+                                />
+                            )}
+                        </g>
+                    );
+                })}
 
                 {/* Nodes */}
-                {nodes.map((node) => (
-                    <g key={node.id}>
-                        {node.type === "decision" ? (
-                            <>
-                                <rect
-                                    x={node.x}
-                                    y={node.y}
-                                    width={node.width}
-                                    height={node.height}
-                                    rx={12}
-                                    fill="url(#decisionGrad)"
-                                    stroke="#f59e0b"
-                                    strokeWidth="1.5"
-                                    opacity={0.9}
-                                />
-                                <text x={node.x + 12} y={node.y + 20} fill="#f0f0f5" fontSize="12" fontWeight="600" fontFamily="var(--font-sans)">
-                                    {node.label.length > 40 ? node.label.slice(0, 37) + "..." : node.label}
+                {nodes.map((node) => {
+                    if (node.type === "branchLabel") {
+                        return (
+                            <g key={node.id}>
+                                <rect x={node.x} y={node.y} width={node.width} height={node.height} rx={10} fill={`${node.color}20`} stroke={node.color} strokeWidth="1" />
+                                <text x={node.x + node.width / 2} y={node.y + 14} textAnchor="middle" fill={node.color} fontSize="9" fontWeight="700" fontFamily="var(--font-sans)">
+                                    {node.label.length > 12 ? node.label.slice(0, 10) + "…" : node.label}
+                                </text>
+                            </g>
+                        );
+                    }
+                    if (node.type === "notes") {
+                        return (
+                            <g key={node.id}>
+                                <rect x={node.x} y={node.y} width={node.width} height={node.height} rx={6} fill="rgba(99, 102, 241, 0.08)" stroke="rgba(99, 102, 241, 0.2)" strokeWidth="1" />
+                                <text x={node.x + 8} y={node.y + 18} fill="#9595b0" fontSize="9" fontStyle="italic" fontFamily="var(--font-sans)">
+                                    📝 {node.label.length > 40 ? node.label.slice(0, 37) + "…" : node.label}
+                                </text>
+                            </g>
+                        );
+                    }
+                    if (node.type === "decision") {
+                        return (
+                            <g key={node.id}>
+                                <rect x={node.x} y={node.y} width={node.width} height={node.height} rx={12} fill="url(#decisionGrad)" stroke="#f59e0b" strokeWidth="1.5" opacity={0.9} />
+                                <text x={node.x + 10} y={node.y + 18} fill="#f0f0f5" fontSize="11" fontWeight="600" fontFamily="var(--font-sans)">
+                                    {node.label.length > 32 ? node.label.slice(0, 29) + "…" : node.label}
                                 </text>
                                 {node.secondaryLabel && (
-                                    <text x={node.x + 12} y={node.y + 38} fill="#fbbf24" fontSize="10" fontFamily="var(--font-sans)">
-                                        ◇ {node.secondaryLabel.length > 45 ? node.secondaryLabel.slice(0, 42) + "..." : node.secondaryLabel}
+                                    <text x={node.x + 10} y={node.y + 36} fill="#fbbf24" fontSize="9" fontFamily="var(--font-sans)">
+                                        ◇ {node.secondaryLabel.length > 38 ? node.secondaryLabel.slice(0, 35) + "…" : node.secondaryLabel}
                                     </text>
                                 )}
                                 {node.actor && (
-                                    <text x={node.x + node.width - 8} y={node.y + 20} textAnchor="end" fill="#5a5a78" fontSize="9" fontFamily="var(--font-sans)">
+                                    <text x={node.x + node.width - 6} y={node.y + 18} textAnchor="end" fill="#5a5a78" fontSize="8" fontFamily="var(--font-sans)">
                                         {node.actor}
                                     </text>
                                 )}
-                            </>
-                        ) : node.id.endsWith("-notes") ? (
-                            <>
-                                <rect x={node.x} y={node.y} width={node.width} height={node.height} rx={6} fill="rgba(99, 102, 241, 0.08)" stroke="rgba(99, 102, 241, 0.2)" strokeWidth="1" />
-                                <text x={node.x + 8} y={node.y + 20} fill="#9595b0" fontSize="10" fontStyle="italic" fontFamily="var(--font-sans)">
-                                    📝 {node.label.length > 50 ? node.label.slice(0, 47) + "..." : node.label}
+                            </g>
+                        );
+                    }
+                    // Regular step
+                    return (
+                        <g key={node.id}>
+                            <rect x={node.x} y={node.y} width={node.width} height={node.height} rx={12} fill="url(#nodeGrad)" stroke={node.depth > 0 ? "#3a3a55" : "#2a2a45"} strokeWidth="1.5" />
+                            <text x={node.x + 10} y={node.y + 20} fill="#f0f0f5" fontSize={node.depth > 0 ? "10" : "11"} fontWeight="500" fontFamily="var(--font-sans)">
+                                {node.label.length > 32 ? node.label.slice(0, 29) + "…" : node.label}
+                            </text>
+                            {node.actor && (
+                                <text x={node.x + 10} y={node.y + 38} fill="#5a5a78" fontSize="9" fontFamily="var(--font-sans)">
+                                    👤 {node.actor}
                                 </text>
-                            </>
-                        ) : (
-                            <>
-                                <rect
-                                    x={node.x}
-                                    y={node.y}
-                                    width={node.width}
-                                    height={node.height}
-                                    rx={12}
-                                    fill="url(#nodeGrad)"
-                                    stroke="#2a2a45"
-                                    strokeWidth="1.5"
-                                />
-                                <text x={node.x + 12} y={node.y + 22} fill="#f0f0f5" fontSize="12" fontWeight="500" fontFamily="var(--font-sans)">
-                                    {node.label.length > 40 ? node.label.slice(0, 37) + "..." : node.label}
-                                </text>
-                                {node.actor && (
-                                    <text x={node.x + 12} y={node.y + 40} fill="#5a5a78" fontSize="10" fontFamily="var(--font-sans)">
-                                        👤 {node.actor}
-                                    </text>
-                                )}
-                            </>
-                        )}
-                    </g>
-                ))}
+                            )}
+                        </g>
+                    );
+                })}
             </svg>
         </div>
     );

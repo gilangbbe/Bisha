@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Process, PROCESS_TYPE_COLORS, PROCESS_TYPE_LABELS } from "@/types";
+import { Process, PROCESS_TYPE_COLORS, PROCESS_TYPE_LABELS, collectDecisions } from "@/types";
 import { getProcessesByIds, getAllProcesses } from "@/lib/processes";
 import Link from "next/link";
 
@@ -65,9 +65,12 @@ function CompareContent() {
         {
             label: "Decision Points",
             render: (p: Process) => {
-                const decisions = p.steps.filter((s) => s.decision);
+                const decisions = collectDecisions(p.steps);
                 return decisions.length > 0
-                    ? decisions.map((s) => `◇ ${s.decision!.question}`).join("\n")
+                    ? decisions.map((d) => {
+                          const depthLabel = d.depth > 0 ? ` [depth ${d.depth}]` : "";
+                          return `◇ ${d.question} (${d.branchCount} branch${d.branchCount !== 1 ? "es" : ""})${depthLabel}`;
+                      }).join("\n")
                     : null;
             },
         },

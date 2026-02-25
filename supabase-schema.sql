@@ -132,10 +132,15 @@ VALUES
     '[
       {"id": "s1", "order": 1, "action": "Customer submits loan application with required documents.", "actor": "Customer"},
       {"id": "s2", "order": 2, "action": "Branch officer verifies KYC and document completeness.", "actor": "Branch Officer"},
-      {"id": "s3", "order": 3, "action": "Credit check performed against bureau records.", "actor": "Credit Analyst", "decision": {"question": "Does credit score meet minimum threshold?", "optionA": {"label": "Yes", "nextStepId": "s4"}, "optionB": {"label": "No", "nextStepId": "s6"}}},
-      {"id": "s4", "order": 4, "action": "Risk assessment and collateral evaluation completed.", "actor": "Risk Officer"},
-      {"id": "s5", "order": 5, "action": "Loan approved and funds disbursed to customer account.", "actor": "Branch Manager", "notes": "Approval authority depends on loan amount tier."},
-      {"id": "s6", "order": 6, "action": "Application rejected with formal rejection letter.", "actor": "Branch Officer", "notes": "Customer may re-apply after 6 months with improved score."}
+      {"id": "s3", "order": 3, "action": "Credit check performed against bureau records.", "actor": "Credit Analyst", "decision": {"question": "Does credit score meet minimum threshold?", "options": [
+        {"id": "o1", "label": "Yes — Approved", "steps": [
+          {"id": "s4", "order": 1, "action": "Risk assessment and collateral evaluation completed.", "actor": "Risk Officer"},
+          {"id": "s5", "order": 2, "action": "Loan approved and funds disbursed to customer account.", "actor": "Branch Manager", "notes": "Approval authority depends on loan amount tier."}
+        ]},
+        {"id": "o2", "label": "No — Rejected", "steps": [
+          {"id": "s6", "order": 1, "action": "Application rejected with formal rejection letter.", "actor": "Branch Officer", "notes": "Customer may re-apply after 6 months with improved score."}
+        ]}
+      ]}}
     ]'::JSONB,
     'Exams often ask who has final approval authority — it depends on loan amount tiers, not always the branch manager.',
     ARRAY['f1a2b3c4-d5e6-7890-abcd-222222222222']::UUID[]

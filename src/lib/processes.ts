@@ -2,6 +2,8 @@ import { supabase } from "./supabase";
 import { Process, ProcessFormData } from "@/types";
 import { v4 as uuidv4 } from "uuid";
 
+// ── Data access ──
+
 export async function getAllProcesses(): Promise<Process[]> {
     const { data, error } = await supabase
         .from("processes")
@@ -9,7 +11,7 @@ export async function getAllProcesses(): Promise<Process[]> {
         .order("updated_at", { ascending: false });
 
     if (error) throw error;
-    return data || [];
+    return (data as Process[]) || [];
 }
 
 export async function getProcessById(id: string): Promise<Process | null> {
@@ -23,7 +25,7 @@ export async function getProcessById(id: string): Promise<Process | null> {
         if (error.code === "PGRST116") return null;
         throw error;
     }
-    return data;
+    return data as Process | null;
 }
 
 export async function getProcessesByIds(ids: string[]): Promise<Process[]> {
@@ -34,7 +36,7 @@ export async function getProcessesByIds(ids: string[]): Promise<Process[]> {
         .in("id", ids);
 
     if (error) throw error;
-    return data || [];
+    return (data as Process[]) || [];
 }
 
 export async function createProcess(formData: ProcessFormData): Promise<Process> {

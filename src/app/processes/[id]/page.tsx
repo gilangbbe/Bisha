@@ -2,7 +2,7 @@
 
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
-import { Process, PROCESS_TYPE_LABELS, PROCESS_TYPE_COLORS } from "@/types";
+import { Process, Step, PROCESS_TYPE_LABELS, PROCESS_TYPE_COLORS, DECISION_BRANCH_COLORS } from "@/types";
 import { getProcessById, getProcessesByIds, deleteProcess } from "@/lib/processes";
 import FlowchartView from "@/components/FlowchartView";
 import MindmapView from "@/components/MindmapView";
@@ -10,6 +10,48 @@ import Link from "next/link";
 
 type ViewMode = "flowchart" | "mindmap" | "steps";
 type ZoomLevel = 1 | 2 | 3;
+
+/** Recursively render a step list with nested branches */
+function StepListView({ steps, depth = 0, prefix = "" }: { steps: Step[]; depth?: number; prefix?: string }) {
+    return (
+        <div style={{ display: "flex", flexDirection: "column", gap: depth === 0 ? "8px" : "6px", marginLeft: depth > 0 ? "16px" : 0 }}>
+            {steps.map((step, i) => {
+                const label = prefix ? `${prefix}.${i + 1}` : `${i + 1}`;
+                return (
+                    <div key={step.id} className={depth === 0 ? "glass-card" : undefined} style={{ padding: depth === 0 ? "14px" : "10px 12px", borderColor: step.decision ? "rgba(245, 158, 11, 0.3)" : undefined, background: depth > 0 ? "rgba(255,255,255,0.02)" : undefined, borderRadius: depth > 0 ? "8px" : undefined, border: depth > 0 ? "1px solid rgba(255,255,255,0.05)" : undefined }}>
+                        <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
+                            <span style={{ width: "24px", height: "24px", borderRadius: "50%", background: step.decision ? "#f59e0b" : depth > 0 ? "#3a3a55" : "#6366f1", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: depth > 0 ? "10px" : "12px", fontWeight: 700, flexShrink: 0 }}>
+                                {label}
+                            </span>
+                            <div style={{ flex: 1 }}>
+                                <p style={{ fontSize: depth > 0 ? "13px" : "14px", lineHeight: 1.5, marginBottom: step.actor ? "4px" : 0 }}>{step.action}</p>
+                                {step.actor && <span style={{ fontSize: "12px", color: "#5a5a78" }}>👤 {step.actor}</span>}
+                                {step.decision && (
+                                    <div style={{ marginTop: "8px", padding: "8px", background: "rgba(245, 158, 11, 0.08)", borderRadius: "8px", border: "1px solid rgba(245, 158, 11, 0.15)" }}>
+                                        <p style={{ fontSize: "12px", color: "#fbbf24", fontWeight: 600, marginBottom: "6px" }}>◇ {step.decision.question}</p>
+                                        {step.decision.options.map((opt, oi) => (
+                                            <div key={opt.id} style={{ marginTop: oi > 0 ? "8px" : "4px" }}>
+                                                <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: opt.steps.length > 0 ? "6px" : 0 }}>
+                                                    <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: DECISION_BRANCH_COLORS[oi % DECISION_BRANCH_COLORS.length], flexShrink: 0 }} />
+                                                    <span style={{ fontSize: "12px", fontWeight: 600, color: DECISION_BRANCH_COLORS[oi % DECISION_BRANCH_COLORS.length] }}>{opt.label}</span>
+                                                    {opt.steps.length > 0 && <span style={{ fontSize: "10px", color: "#5a5a78" }}>({opt.steps.length} step{opt.steps.length !== 1 ? "s" : ""})</span>}
+                                                </div>
+                                                {opt.steps.length > 0 && (
+                                                    <StepListView steps={opt.steps} depth={depth + 1} prefix={`${label}.${String.fromCharCode(65 + oi)}`} />
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                {step.notes && <p style={{ fontSize: "12px", color: "#9595b0", fontStyle: "italic", marginTop: "6px" }}>📝 {step.notes}</p>}
+                            </div>
+                        </div>
+                    </div>
+                );
+            })}
+        </div>
+    );
+}
 
 export default function ProcessDetailPage({
     params,
@@ -166,31 +208,7 @@ export default function ProcessDetailPage({
                 <MindmapView steps={process.steps} title={process.title} zoomLevel={zoomLevel} />
             )}
             {viewMode === "steps" && (
-                <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                    {process.steps.map((step, i) => (
-                        <div key={step.id} className="glass-card" style={{ padding: "14px", borderColor: step.decision ? "rgba(245, 158, 11, 0.3)" : undefined }}>
-                            <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
-                                <span style={{ width: "24px", height: "24px", borderRadius: "50%", background: step.decision ? "#f59e0b" : "#6366f1", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "12px", fontWeight: 700, flexShrink: 0 }}>
-                                    {i + 1}
-                                </span>
-                                <div style={{ flex: 1 }}>
-                                    <p style={{ fontSize: "14px", lineHeight: 1.5, marginBottom: step.actor ? "4px" : 0 }}>{step.action}</p>
-                                    {step.actor && <span style={{ fontSize: "12px", color: "#5a5a78" }}>👤 {step.actor}</span>}
-                                    {step.decision && (
-                                        <div style={{ marginTop: "8px", padding: "8px", background: "rgba(245, 158, 11, 0.08)", borderRadius: "8px", border: "1px solid rgba(245, 158, 11, 0.15)" }}>
-                                            <p style={{ fontSize: "12px", color: "#fbbf24", fontWeight: 600, marginBottom: "4px" }}>◇ {step.decision.question}</p>
-                                            <div style={{ display: "flex", gap: "8px", fontSize: "12px" }}>
-                                                <span style={{ color: "#10b981" }}>✓ {step.decision.optionA.label}</span>
-                                                <span style={{ color: "#ef4444" }}>✗ {step.decision.optionB.label}</span>
-                                            </div>
-                                        </div>
-                                    )}
-                                    {step.notes && <p style={{ fontSize: "12px", color: "#9595b0", fontStyle: "italic", marginTop: "6px" }}>📝 {step.notes}</p>}
-                                </div>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                <StepListView steps={process.steps} />
             )}
 
             {/* Confused With */}
