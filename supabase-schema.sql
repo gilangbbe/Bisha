@@ -161,3 +161,30 @@ VALUES
     'Don''t confuse credit card issuance with loan approval — credit cards are revolving credit with no fixed tenure.',
     ARRAY['f1a2b3c4-d5e6-7890-abcd-111111111111']::UUID[]
   );
+
+-- ── Notes Table (Block-Based Notes Module) ──
+
+CREATE TABLE IF NOT EXISTS notes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title TEXT NOT NULL,
+  blocks JSONB NOT NULL DEFAULT '[]',
+  category TEXT NOT NULL DEFAULT 'GENERAL'
+    CHECK (category IN (
+      'PRODUCT', 'PROCESS', 'REGULATION', 'ROLE',
+      'DEFINITION', 'FORMULA', 'CASE_STUDY', 'EXAM_TIP', 'GENERAL'
+    )),
+  tags TEXT[] NOT NULL DEFAULT '{}',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE notes ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow all access" ON notes
+  FOR ALL
+  USING (true)
+  WITH CHECK (true);
+
+CREATE INDEX IF NOT EXISTS idx_notes_category ON notes(category);
+CREATE INDEX IF NOT EXISTS idx_notes_created_at ON notes(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notes_tags ON notes USING gin(tags);
