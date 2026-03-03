@@ -24,11 +24,11 @@ function StepListView({ steps, depth = 0, prefix = "" }: { steps: Step[]; depth?
                                 {label}
                             </span>
                             <div style={{ flex: 1 }}>
-                                <p style={{ fontSize: depth > 0 ? "13px" : "14px", lineHeight: 1.5, marginBottom: step.actor ? "4px" : 0 }}>{step.action}</p>
+                                <p style={{ fontSize: depth > 0 ? "13px" : "14px", lineHeight: 1.5, marginBottom: step.actor ? "4px" : 0, whiteSpace: "pre-line" }}>{step.action}</p>
                                 {step.actor && <span style={{ fontSize: "12px", color: "#5a5a78" }}>👤 {step.actor}</span>}
                                 {step.decision && (
                                     <div style={{ marginTop: "8px", padding: "8px", background: "rgba(245, 158, 11, 0.08)", borderRadius: "8px", border: "1px solid rgba(245, 158, 11, 0.15)" }}>
-                                        <p style={{ fontSize: "12px", color: "#fbbf24", fontWeight: 600, marginBottom: "6px" }}>◇ {step.decision.question}</p>
+                                        <p style={{ fontSize: "12px", color: "#fbbf24", fontWeight: 600, marginBottom: "6px", whiteSpace: "pre-line" }}>◇ {step.decision.question}</p>
                                         {step.decision.options.map((opt, oi) => (
                                             <div key={opt.id} style={{ marginTop: oi > 0 ? "8px" : "4px" }}>
                                                 <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: opt.steps.length > 0 ? "6px" : 0 }}>
@@ -43,7 +43,7 @@ function StepListView({ steps, depth = 0, prefix = "" }: { steps: Step[]; depth?
                                         ))}
                                     </div>
                                 )}
-                                {step.notes && <p style={{ fontSize: "12px", color: "#9595b0", fontStyle: "italic", marginTop: "6px" }}>📝 {step.notes}</p>}
+                                {step.notes && <p style={{ fontSize: "12px", color: "#9595b0", fontStyle: "italic", marginTop: "6px", whiteSpace: "pre-line" }}>📝 {step.notes}</p>}
                             </div>
                         </div>
                     </div>
@@ -146,13 +146,13 @@ export default function ProcessDetailPage({
                 {process.trigger && (
                     <div className="glass-card" style={{ padding: "12px", flex: 1 }}>
                         <div style={{ fontSize: "11px", fontWeight: 600, color: "#10b981", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>▶ Trigger</div>
-                        <p style={{ fontSize: "13px", lineHeight: 1.5 }}>{process.trigger}</p>
+                        <p style={{ fontSize: "13px", lineHeight: 1.5, whiteSpace: "pre-line" }}>{process.trigger}</p>
                     </div>
                 )}
                 {process.outcome && (
                     <div className="glass-card" style={{ padding: "12px", flex: 1 }}>
                         <div style={{ fontSize: "11px", fontWeight: 600, color: "#6366f1", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>◉ Outcome</div>
-                        <p style={{ fontSize: "13px", lineHeight: 1.5 }}>{process.outcome}</p>
+                        <p style={{ fontSize: "13px", lineHeight: 1.5, whiteSpace: "pre-line" }}>{process.outcome}</p>
                     </div>
                 )}
             </div>
@@ -163,7 +163,7 @@ export default function ProcessDetailPage({
                     <span style={{ fontSize: "18px", flexShrink: 0 }}>⚠️</span>
                     <div>
                         <div style={{ fontSize: "12px", fontWeight: 600, color: "#f59e0b", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "4px" }}>Exam Trap</div>
-                        <p style={{ fontSize: "14px", color: "#fbbf24", lineHeight: 1.5 }}>{process.exam_trap_alert}</p>
+                        <p style={{ fontSize: "14px", color: "#fbbf24", lineHeight: 1.5, whiteSpace: "pre-line" }}>{process.exam_trap_alert}</p>
                     </div>
                 </div>
             )}

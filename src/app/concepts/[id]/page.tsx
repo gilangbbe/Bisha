@@ -146,7 +146,7 @@ export default function ConceptDetailPage({
                 >
                     💡 Memory Hook
                 </div>
-                <p style={{ fontSize: "15px", lineHeight: 1.6, fontWeight: 500 }}>
+                <p style={{ fontSize: "15px", lineHeight: 1.6, fontWeight: 500, whiteSpace: "pre-line" }}>
                     {concept.exam_memory_hook}
                 </p>
             </div>
@@ -168,7 +168,7 @@ export default function ConceptDetailPage({
                         >
                             Exam Trap
                         </div>
-                        <p style={{ fontSize: "14px", color: "#fbbf24", lineHeight: 1.5 }}>
+                        <p style={{ fontSize: "14px", color: "#fbbf24", lineHeight: 1.5, whiteSpace: "pre-line" }}>
                             {concept.exam_trap_alert}
                         </p>
                     </div>
@@ -182,7 +182,7 @@ export default function ConceptDetailPage({
                     <div style={{ fontSize: "12px", fontWeight: 600, color: "#9595b0", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>
                         Purpose
                     </div>
-                    <p style={{ fontSize: "14px", lineHeight: 1.6 }}>{concept.purpose}</p>
+                    <p style={{ fontSize: "14px", lineHeight: 1.6, whiteSpace: "pre-line" }}>{concept.purpose}</p>
                 </div>
 
                 {/* Used When */}
@@ -191,7 +191,7 @@ export default function ConceptDetailPage({
                         <div style={{ fontSize: "12px", fontWeight: 600, color: "#9595b0", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>
                             Used When
                         </div>
-                        <p style={{ fontSize: "14px", lineHeight: 1.6 }}>{concept.used_when}</p>
+                        <p style={{ fontSize: "14px", lineHeight: 1.6, whiteSpace: "pre-line" }}>{concept.used_when}</p>
                     </div>
                 )}
 
@@ -226,7 +226,7 @@ export default function ConceptDetailPage({
                     <div style={{ fontSize: "12px", fontWeight: 600, color: "#818cf8", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>
                         Key Difference
                     </div>
-                    <p style={{ fontSize: "14px", lineHeight: 1.6 }}>{concept.key_difference}</p>
+                    <p style={{ fontSize: "14px", lineHeight: 1.6, whiteSpace: "pre-line" }}>{concept.key_difference}</p>
                 </div>
 
                 {/* Confused With */}

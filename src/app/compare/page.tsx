@@ -83,13 +83,13 @@ function CompareContent() {
                     {value.map((v, i) => (
                         <li key={i} style={{ display: "flex", gap: "6px", alignItems: "flex-start" }}>
                             <span style={{ color: "#6366f1" }}>•</span>
-                            {v}
+                            <span style={{ whiteSpace: "pre-line" }}>{v}</span>
                         </li>
                     ))}
                 </ul>
             );
         }
-        return value;
+        return <span style={{ whiteSpace: "pre-line" }}>{value}</span>;
     };
 
     const filteredPicker = allConcepts.filter(

@@ -89,6 +89,7 @@ export default function ConceptCard({
                             fontSize: "13px",
                             color: "#9595b0",
                             lineHeight: 1.5,
+                            whiteSpace: "pre-line",
                             display: "-webkit-box",
                             WebkitLineClamp: 2,
                             WebkitBoxOrient: "vertical",

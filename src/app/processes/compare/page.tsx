@@ -186,13 +186,13 @@ function CompareContent() {
                                                             {(value as string).split(" → ").map((step, si) => (
                                                                 <span key={si} style={{ display: "flex", gap: "6px", alignItems: "flex-start" }}>
                                                                     <span style={{ color: "#6366f1", flexShrink: 0 }}>{si + 1}.</span>
-                                                                    {step}
+                                                                    <span style={{ whiteSpace: "pre-line" }}>{step}</span>
                                                                 </span>
                                                             ))}
                                                         </div>
                                                     ) : dim.label === "Decision Points" ? (
                                                         <div style={{ whiteSpace: "pre-line" }}>{value}</div>
-                                                    ) : value}
+                                                    ) : <span style={{ whiteSpace: "pre-line" }}>{value}</span>}
                                                 </td>
                                             );
                                         })}

@@ -106,7 +106,7 @@ export default function EditProcessPage({
                 <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                     <div>
                         <label style={{ fontSize: "13px", fontWeight: 600, color: "#9595b0", display: "block", marginBottom: "6px" }}>Process Title *</label>
-                        <input className="input-field" value={title} onChange={(e) => { setTitle(e.target.value); if (errors.title) setErrors((p) => ({ ...p, title: "" })); }} />
+                        <textarea className="input-field" value={title} onChange={(e) => { setTitle(e.target.value); if (errors.title) setErrors((p) => ({ ...p, title: "" })); }} rows={1} />
                         {errors.title && <span style={{ fontSize: "12px", color: "#ef4444" }}>{errors.title}</span>}
                     </div>
 
@@ -125,12 +125,12 @@ export default function EditProcessPage({
 
                     <div>
                         <label style={{ fontSize: "13px", fontWeight: 600, color: "#9595b0", display: "block", marginBottom: "6px" }}>Trigger</label>
-                        <input className="input-field" value={trigger} onChange={(e) => setTrigger(e.target.value)} />
+                        <textarea className="input-field" value={trigger} onChange={(e) => setTrigger(e.target.value)} rows={2} />
                     </div>
 
                     <div>
                         <label style={{ fontSize: "13px", fontWeight: 600, color: "#9595b0", display: "block", marginBottom: "6px" }}>Outcome</label>
-                        <input className="input-field" value={outcome} onChange={(e) => setOutcome(e.target.value)} />
+                        <textarea className="input-field" value={outcome} onChange={(e) => setOutcome(e.target.value)} rows={2} />
                     </div>
 
                     <div>

@@ -137,3 +137,23 @@
 - `src/app/processes/create/page.tsx` — removed `maxLength` from title, trigger, outcome, exam trap fields
 - `src/app/processes/[id]/edit/page.tsx` — removed `maxLength` from title, trigger, outcome, exam trap fields
 - `src/components/StepEditor.tsx` — removed `maxLength` from action, actor, decision question, branch label, and notes inputs
+---
+
+## 2026-03-02 — Newline / Multi-line Text Support
+
+### What changed
+- **All single-line `<input>` fields converted to `<textarea>`** — users can now press Enter to create newlines in any form field (concept forms, process forms, step editor)
+- **All text display elements render newlines** — added `whiteSpace: "pre-line"` to every `<p>` and text container across detail views, cards, compare tables, and step list views so saved newlines display correctly
+
+### Forms updated (input → textarea)
+- `src/components/ConceptForm.tsx` — title and each key characteristic field converted to `<textarea rows={1}>`
+- `src/app/processes/create/page.tsx` — title → `<textarea rows={1}>`, trigger → `<textarea rows={2}>`, outcome → `<textarea rows={2}>`
+- `src/app/processes/[id]/edit/page.tsx` — title → `<textarea rows={1}>`, trigger → `<textarea rows={2}>`, outcome → `<textarea rows={2}>`
+- `src/components/StepEditor.tsx` — action, actor, decision question, branch label, notes all converted to `<textarea rows={1}>`
+
+### Views updated (whiteSpace: pre-line)
+- `src/app/concepts/[id]/page.tsx` — purpose, used_when, key_difference, exam_memory_hook, exam_trap_alert
+- `src/app/processes/[id]/page.tsx` — trigger, outcome, exam_trap_alert + StepListView: step.action, step.decision.question, step.notes
+- `src/components/ConceptCard.tsx` — purpose preview text
+- `src/app/compare/page.tsx` — `renderValue()` wraps all text values and key_characteristics items in `<span>` with pre-line
+- `src/app/processes/compare/page.tsx` — trigger, outcome, exam_trap, key steps all wrapped with pre-line

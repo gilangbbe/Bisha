@@ -143,11 +143,12 @@ export default function ConceptForm({ existingConcept }: ConceptFormProps) {
                     >
                         Title *
                     </label>
-                    <input
+                    <textarea
                         className="input-field"
                         placeholder="e.g. Savings Account"
                         value={form.title}
                         onChange={(e) => updateField("title", e.target.value)}
+                        rows={1}
                     />
                     {errors.title && (
                         <span style={{ fontSize: "12px", color: "#ef4444", marginTop: "4px" }}>
@@ -272,11 +273,12 @@ export default function ConceptForm({ existingConcept }: ConceptFormProps) {
                                 key={i}
                                 style={{ display: "flex", gap: "8px", alignItems: "center" }}
                             >
-                                <input
+                                <textarea
                                     className="input-field"
                                     placeholder={`Characteristic ${i + 1}`}
                                     value={char}
                                     onChange={(e) => updateCharacteristic(i, e.target.value)}
+                                    rows={1}
                                 />
                                 {form.key_characteristics.length > 1 && (
                                     <button
