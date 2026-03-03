@@ -95,7 +95,7 @@ export default function ConceptCard({
                             overflow: "hidden",
                         }}
                     >
-                        {concept.key_difference}
+                        {concept.purpose}
                     </p>
                 </div>
                 {!selectable && (

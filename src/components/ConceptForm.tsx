@@ -96,9 +96,7 @@ export default function ConceptForm({ existingConcept }: ConceptFormProps) {
     };
 
     const addCharacteristic = () => {
-        if (form.key_characteristics.length < 3) {
-            updateField("key_characteristics", [...form.key_characteristics, ""]);
-        }
+        updateField("key_characteristics", [...form.key_characteristics, ""]);
     };
 
     const updateCharacteristic = (index: number, value: string) => {
@@ -150,7 +148,6 @@ export default function ConceptForm({ existingConcept }: ConceptFormProps) {
                         placeholder="e.g. Savings Account"
                         value={form.title}
                         onChange={(e) => updateField("title", e.target.value)}
-                        maxLength={100}
                     />
                     {errors.title && (
                         <span style={{ fontSize: "12px", color: "#ef4444", marginTop: "4px" }}>
@@ -219,7 +216,6 @@ export default function ConceptForm({ existingConcept }: ConceptFormProps) {
                         placeholder="A deposit account that earns interest..."
                         value={form.purpose}
                         onChange={(e) => updateField("purpose", e.target.value)}
-                        maxLength={300}
                         rows={3}
                     />
                     {errors.purpose && (
@@ -250,7 +246,6 @@ export default function ConceptForm({ existingConcept }: ConceptFormProps) {
                         placeholder="When a customer wants to save money safely..."
                         value={form.used_when}
                         onChange={(e) => updateField("used_when", e.target.value)}
-                        maxLength={300}
                         rows={2}
                     />
                 </div>
@@ -268,7 +263,7 @@ export default function ConceptForm({ existingConcept }: ConceptFormProps) {
                     >
                         Key Characteristics
                         <span style={{ fontWeight: 400, color: "#5a5a78", marginLeft: "4px" }}>
-                            — Max 3
+                            — Add as many as needed
                         </span>
                     </label>
                     <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -282,7 +277,6 @@ export default function ConceptForm({ existingConcept }: ConceptFormProps) {
                                     placeholder={`Characteristic ${i + 1}`}
                                     value={char}
                                     onChange={(e) => updateCharacteristic(i, e.target.value)}
-                                    maxLength={120}
                                 />
                                 {form.key_characteristics.length > 1 && (
                                     <button
@@ -296,16 +290,14 @@ export default function ConceptForm({ existingConcept }: ConceptFormProps) {
                                 )}
                             </div>
                         ))}
-                        {form.key_characteristics.length < 3 && (
-                            <button
-                                type="button"
-                                onClick={addCharacteristic}
-                                className="btn btn-secondary btn-sm"
-                                style={{ alignSelf: "flex-start" }}
-                            >
-                                + Add characteristic
-                            </button>
-                        )}
+                        <button
+                            type="button"
+                            onClick={addCharacteristic}
+                            className="btn btn-secondary btn-sm"
+                            style={{ alignSelf: "flex-start" }}
+                        >
+                            + Add characteristic
+                        </button>
                     </div>
                 </div>
 
@@ -330,7 +322,6 @@ export default function ConceptForm({ existingConcept }: ConceptFormProps) {
                         placeholder="Unlike fixed deposits, this allows withdrawals..."
                         value={form.key_difference}
                         onChange={(e) => updateField("key_difference", e.target.value)}
-                        maxLength={400}
                         rows={3}
                     />
                     {errors.key_difference && (
@@ -361,7 +352,6 @@ export default function ConceptForm({ existingConcept }: ConceptFormProps) {
                         placeholder='Think: "Savings = Safety + Small returns"'
                         value={form.exam_memory_hook}
                         onChange={(e) => updateField("exam_memory_hook", e.target.value)}
-                        maxLength={200}
                         rows={2}
                     />
                     {errors.exam_memory_hook && (
@@ -394,7 +384,6 @@ export default function ConceptForm({ existingConcept }: ConceptFormProps) {
                         onChange={(e) =>
                             updateField("exam_trap_alert", e.target.value || null)
                         }
-                        maxLength={300}
                         rows={2}
                     />
                 </div>

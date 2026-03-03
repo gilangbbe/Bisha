@@ -200,10 +200,10 @@ export default function StepEditor({
                         </div>
 
                         {/* Action */}
-                        <input className="input-field" placeholder="What happens in this step?" value={step.action} onChange={(e) => updateStep(i, { action: e.target.value })} maxLength={150} style={{ marginBottom: "8px", fontSize: depth > 0 ? "13px" : undefined }} />
+                        <input className="input-field" placeholder="What happens in this step?" value={step.action} onChange={(e) => updateStep(i, { action: e.target.value })} style={{ marginBottom: "8px", fontSize: depth > 0 ? "13px" : undefined }} />
 
                         {/* Actor */}
-                        <input className="input-field" placeholder="Who does it? (optional)" value={step.actor || ""} onChange={(e) => updateStep(i, { actor: e.target.value || undefined })} maxLength={50} style={{ marginBottom: "8px", fontSize: "13px" }} />
+                        <input className="input-field" placeholder="Who does it? (optional)" value={step.actor || ""} onChange={(e) => updateStep(i, { actor: e.target.value || undefined })} style={{ marginBottom: "8px", fontSize: "13px" }} />
 
                         {/* Decision toggle + Notes */}
                         <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
@@ -220,7 +220,7 @@ export default function StepEditor({
                         {/* Decision: question + branches with nested editors */}
                         {step.decision && (
                             <div style={{ marginTop: "10px", padding: "10px", background: "rgba(245, 158, 11, 0.05)", borderRadius: "8px", border: "1px solid rgba(245, 158, 11, 0.15)" }}>
-                                <input className="input-field" placeholder="Decision question (e.g., 'Is score above threshold?')" value={step.decision.question} onChange={(e) => updateStep(i, { decision: { ...step.decision!, question: e.target.value } })} maxLength={120} style={{ marginBottom: "10px", fontSize: "13px" }} />
+                                <input className="input-field" placeholder="Decision question (e.g., 'Is score above threshold?')" value={step.decision.question} onChange={(e) => updateStep(i, { decision: { ...step.decision!, question: e.target.value } })} style={{ marginBottom: "10px", fontSize: "13px" }} />
 
                                 {/* Branches */}
                                 {step.decision.options.map((opt, oi) => {
@@ -230,7 +230,7 @@ export default function StepEditor({
                                             {/* Branch label header */}
                                             <div style={{ display: "flex", gap: "6px", alignItems: "center", marginBottom: "6px" }}>
                                                 <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: branchColor, flexShrink: 0 }} />
-                                                <input className="input-field" placeholder={`Branch ${oi + 1} label`} value={opt.label} onChange={(e) => updateDecisionOptionLabel(i, oi, e.target.value)} maxLength={30} style={{ flex: 1, fontSize: "13px" }} />
+                                                <input className="input-field" placeholder={`Branch ${oi + 1} label`} value={opt.label} onChange={(e) => updateDecisionOptionLabel(i, oi, e.target.value)} style={{ flex: 1, fontSize: "13px" }} />
                                                 <span style={{ fontSize: "10px", color: "#5a5a78", flexShrink: 0 }}>{opt.steps.length} step{opt.steps.length !== 1 ? "s" : ""}</span>
                                                 {step.decision!.options.length > MIN_DECISION_OPTIONS && (
                                                     <button type="button" onClick={() => removeDecisionOption(i, oi)} className="btn btn-ghost btn-sm" style={{ padding: "2px 6px", color: "#ef4444", fontSize: "12px" }}>✕</button>
@@ -259,7 +259,7 @@ export default function StepEditor({
                         {/* Notes */}
                         {step.notes !== undefined && step.notes !== null && (
                             <div style={{ marginTop: "8px" }}>
-                                <input className="input-field" placeholder="Short note or clarification..." value={step.notes} onChange={(e) => updateStep(i, { notes: e.target.value })} maxLength={120} style={{ fontSize: "13px" }} />
+                                <input className="input-field" placeholder="Short note or clarification..." value={step.notes} onChange={(e) => updateStep(i, { notes: e.target.value })} style={{ fontSize: "13px" }} />
                             </div>
                         )}
                     </div>

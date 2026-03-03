@@ -81,7 +81,7 @@ export default function CreateProcessPage() {
                         <label style={{ fontSize: "13px", fontWeight: 600, color: "#9595b0", display: "block", marginBottom: "6px" }}>
                             Process Title *
                         </label>
-                        <input className="input-field" placeholder="e.g. Loan Approval Process" value={title} onChange={(e) => { setTitle(e.target.value); if (errors.title) setErrors((p) => ({ ...p, title: "" })); }} maxLength={100} />
+                        <input className="input-field" placeholder="e.g. Loan Approval Process" value={title} onChange={(e) => { setTitle(e.target.value); if (errors.title) setErrors((p) => ({ ...p, title: "" })); }} />
                         {errors.title && <span style={{ fontSize: "12px", color: "#ef4444", marginTop: "4px" }}>{errors.title}</span>}
                     </div>
 
@@ -109,7 +109,7 @@ export default function CreateProcessPage() {
                             Trigger
                             <span style={{ fontWeight: 400, color: "#5a5a78", marginLeft: "4px" }}>— What starts this process?</span>
                         </label>
-                        <input className="input-field" placeholder="e.g. Customer submits loan application" value={trigger} onChange={(e) => setTrigger(e.target.value)} maxLength={200} />
+                        <input className="input-field" placeholder="e.g. Customer submits loan application" value={trigger} onChange={(e) => setTrigger(e.target.value)} />
                     </div>
 
                     {/* Outcome */}
@@ -118,7 +118,7 @@ export default function CreateProcessPage() {
                             Outcome
                             <span style={{ fontWeight: 400, color: "#5a5a78", marginLeft: "4px" }}>— What is the end result?</span>
                         </label>
-                        <input className="input-field" placeholder="e.g. Loan approved and disbursed" value={outcome} onChange={(e) => setOutcome(e.target.value)} maxLength={200} />
+                        <input className="input-field" placeholder="e.g. Loan approved and disbursed" value={outcome} onChange={(e) => setOutcome(e.target.value)} />
                     </div>
 
                     {/* Steps */}
@@ -137,7 +137,7 @@ export default function CreateProcessPage() {
                             ⚠️ Exam Trap Alert
                             <span style={{ fontWeight: 400, color: "#5a5a78", marginLeft: "4px" }}>— Common mistake in exams</span>
                         </label>
-                        <textarea className="input-field" placeholder="What do exams commonly trick you with?" value={examTrapAlert} onChange={(e) => setExamTrapAlert(e.target.value)} maxLength={300} rows={2} />
+                        <textarea className="input-field" placeholder="What do exams commonly trick you with?" value={examTrapAlert} onChange={(e) => setExamTrapAlert(e.target.value)} rows={2} />
                     </div>
 
                     {/* Submit */}

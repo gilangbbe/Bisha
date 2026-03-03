@@ -106,7 +106,7 @@ export default function EditProcessPage({
                 <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                     <div>
                         <label style={{ fontSize: "13px", fontWeight: 600, color: "#9595b0", display: "block", marginBottom: "6px" }}>Process Title *</label>
-                        <input className="input-field" value={title} onChange={(e) => { setTitle(e.target.value); if (errors.title) setErrors((p) => ({ ...p, title: "" })); }} maxLength={100} />
+                        <input className="input-field" value={title} onChange={(e) => { setTitle(e.target.value); if (errors.title) setErrors((p) => ({ ...p, title: "" })); }} />
                         {errors.title && <span style={{ fontSize: "12px", color: "#ef4444" }}>{errors.title}</span>}
                     </div>
 
@@ -125,12 +125,12 @@ export default function EditProcessPage({
 
                     <div>
                         <label style={{ fontSize: "13px", fontWeight: 600, color: "#9595b0", display: "block", marginBottom: "6px" }}>Trigger</label>
-                        <input className="input-field" value={trigger} onChange={(e) => setTrigger(e.target.value)} maxLength={200} />
+                        <input className="input-field" value={trigger} onChange={(e) => setTrigger(e.target.value)} />
                     </div>
 
                     <div>
                         <label style={{ fontSize: "13px", fontWeight: 600, color: "#9595b0", display: "block", marginBottom: "6px" }}>Outcome</label>
-                        <input className="input-field" value={outcome} onChange={(e) => setOutcome(e.target.value)} maxLength={200} />
+                        <input className="input-field" value={outcome} onChange={(e) => setOutcome(e.target.value)} />
                     </div>
 
                     <div>
@@ -141,7 +141,7 @@ export default function EditProcessPage({
 
                     <div>
                         <label style={{ fontSize: "13px", fontWeight: 600, color: "#f59e0b", display: "block", marginBottom: "6px" }}>⚠️ Exam Trap Alert</label>
-                        <textarea className="input-field" value={examTrapAlert} onChange={(e) => setExamTrapAlert(e.target.value)} maxLength={300} rows={2} />
+                        <textarea className="input-field" value={examTrapAlert} onChange={(e) => setExamTrapAlert(e.target.value)} rows={2} />
                     </div>
 
                     <button type="submit" className="btn btn-primary pulse-glow" disabled={saving} style={{ width: "100%", padding: "14px", fontSize: "16px", marginTop: "8px", opacity: saving ? 0.7 : 1 }}>

@@ -121,3 +121,19 @@
 - `src/app/processes/[id]/page.tsx` — new recursive `StepListView` component for steps tab
 - `src/app/processes/compare/page.tsx` — uses `collectDecisions()` with depth annotations
 - `supabase-schema.sql` — seed data uses recursive `steps: []` within options
+
+---
+
+## 2026-03-02 — Remove Character Limits & UX Tweaks
+
+### What changed
+- **Removed all `maxLength` constraints** from every form field across concept and process forms — users can now write as much as needed without hitting invisible caps
+- **Key Characteristics uncapped** — previously hard-capped at 3 entries; "Add characteristic" button is now always available with no upper limit. Label changed from "Max 3" to "Add as many as needed"
+- **Home page preview shows Purpose** instead of Key Difference — `ConceptCard` now displays `concept.purpose` for a more informative at-a-glance preview
+
+### Files modified
+- `src/components/ConceptForm.tsx` — removed `maxLength` from all 6 text inputs/textareas (title, purpose, used_when, characteristics, key_difference, memory_hook, exam_trap); removed `< 3` guard on `addCharacteristic()`; updated label text
+- `src/components/ConceptCard.tsx` — changed preview text from `concept.key_difference` to `concept.purpose`
+- `src/app/processes/create/page.tsx` — removed `maxLength` from title, trigger, outcome, exam trap fields
+- `src/app/processes/[id]/edit/page.tsx` — removed `maxLength` from title, trigger, outcome, exam trap fields
+- `src/components/StepEditor.tsx` — removed `maxLength` from action, actor, decision question, branch label, and notes inputs
