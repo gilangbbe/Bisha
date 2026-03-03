@@ -1,3 +1,22 @@
+## 2026-03-03 — Reference Blocks Now Support Notes
+
+### What changed
+- Reference blocks can now link to other **notes** in addition to concepts and processes
+- `BlockMeta.refType` expanded from `"concept" | "process"` to `"concept" | "process" | "note"`
+- Reference picker shows all 3 types: concepts (📋), processes (🔄), notes (📝) with distinct colors
+- Note detail and edit pages exclude the current note from the reference picker to prevent self-referencing
+
+### Files modified
+- `src/types.ts` — Added `"note"` to `refType` union, updated `BLOCK_TYPE_CONFIG` reference description
+- `src/components/NoteBlockEditor.tsx` — Added `notes` prop, notes section in picker, note display in selected state
+- `src/components/NoteBlockView.tsx` — Added `notes` prop, note rendering with purple styling and `/notes/[id]` link
+- `src/app/notes/create/page.tsx` — Loads all notes and passes to editor
+- `src/app/notes/[id]/edit/page.tsx` — Loads all notes (excluding current) and passes to editor
+- `src/app/notes/[id]/page.tsx` — Loads all notes (excluding current) and passes to viewer
+- `TechnicalDocumentation.md` — Updated reference block spec and data model
+
+---
+
 ## 2026-02-25 — V3 Block-Based Notes Feature Implemented
 
 ### What changed

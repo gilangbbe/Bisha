@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { Note, NOTE_CATEGORY_LABELS, NOTE_CATEGORY_COLORS, NoteCategory, Concept, Process } from "@/types";
-import { getNoteById, deleteNote } from "@/lib/notes";
+import { getNoteById, deleteNote, getAllNotes } from "@/lib/notes";
 import { getAllConcepts } from "@/lib/concepts";
 import { getAllProcesses } from "@/lib/processes";
 import NoteBlockView from "@/components/NoteBlockView";
@@ -19,6 +19,7 @@ export default function NoteDetailPage({
     const [note, setNote] = useState<Note | null>(null);
     const [concepts, setConcepts] = useState<Concept[]>([]);
     const [processes, setProcesses] = useState<Process[]>([]);
+    const [allNotes, setAllNotes] = useState<Note[]>([]);
     const [loading, setLoading] = useState(true);
     const [deleting, setDeleting] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -26,14 +27,16 @@ export default function NoteDetailPage({
     useEffect(() => {
         async function load() {
             try {
-                const [n, c, p] = await Promise.all([
+                const [n, c, p, otherNotes] = await Promise.all([
                     getNoteById(id),
                     getAllConcepts(),
                     getAllProcesses(),
+                    getAllNotes(),
                 ]);
                 setNote(n);
                 setConcepts(c);
                 setProcesses(p);
+                setAllNotes(otherNotes.filter((item) => item.id !== id));
             } catch (err) {
                 console.error(err);
             } finally {
@@ -174,6 +177,7 @@ export default function NoteDetailPage({
                     blocks={note.blocks}
                     concepts={concepts}
                     processes={processes}
+                    notes={allNotes}
                 />
             </div>
 

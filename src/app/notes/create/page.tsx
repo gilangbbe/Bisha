@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { NoteCategory, NOTE_CATEGORY_LABELS, NoteBlock, NoteFormData, Concept, Process } from "@/types";
-import { createNote } from "@/lib/notes";
+import { NoteCategory, NOTE_CATEGORY_LABELS, NoteBlock, NoteFormData, Concept, Process, Note } from "@/types";
+import { createNote, getAllNotes } from "@/lib/notes";
 import { getAllConcepts } from "@/lib/concepts";
 import { getAllProcesses } from "@/lib/processes";
 import NoteBlockEditor from "@/components/NoteBlockEditor";
@@ -14,6 +14,7 @@ export default function CreateNotePage() {
     const [saving, setSaving] = useState(false);
     const [concepts, setConcepts] = useState<Concept[]>([]);
     const [processes, setProcesses] = useState<Process[]>([]);
+    const [allNotes, setAllNotes] = useState<Note[]>([]);
 
     const [title, setTitle] = useState("");
     const [category, setCategory] = useState<NoteCategory>(NoteCategory.GENERAL);
@@ -25,6 +26,7 @@ export default function CreateNotePage() {
     useEffect(() => {
         getAllConcepts().then(setConcepts).catch(console.error);
         getAllProcesses().then(setProcesses).catch(console.error);
+        getAllNotes().then(setAllNotes).catch(console.error);
     }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -135,6 +137,7 @@ export default function CreateNotePage() {
                         onChange={setBlocks}
                         concepts={concepts}
                         processes={processes}
+                        notes={allNotes}
                     />
                 </div>
 

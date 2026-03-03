@@ -36,7 +36,7 @@ Why blocks instead of a single textarea?
 | `callout` | Highlighted box | Free text | Colored box with icon. Style in metadata: `info` (blue 💡), `warning` (amber ⚠️), `tip` (green ✅), `important` (red 🔴) |
 | `list` | Bullet or numbered list | Items stored as string array in metadata | Rendered as ul/ol. List style in metadata: `bullet` or `numbered` |
 | `divider` | Visual separator | *(none)* | Horizontal line |
-| `reference` | Link to existing concept or process | *(none — resolved from ID)* | Embedded mini-card showing the referenced item's title, category, and preview. Tappable to navigate. |
+| `reference` | Link to existing concept, process, or note | *(none — resolved from ID)* | Embedded mini-card showing the referenced item's title, category, and preview. Tappable to navigate. |
 | `code` | Code/formula/technical text | Free text | Monospaced, dark background block |
 
 ### Data Model
@@ -71,7 +71,7 @@ BlockMeta {
   items?: string[]                 // list items
 
   // For reference:
-  refType?: "concept" | "process"  // what kind of item is referenced
+  refType?: "concept" | "process" | "note"  // what kind of item is referenced
   refId?: UUID                     // the referenced item's ID
 }
 
@@ -253,7 +253,7 @@ export interface BlockMeta {
   style?: "info" | "warning" | "tip" | "important";
   listStyle?: "bullet" | "numbered";
   items?: string[];
-  refType?: "concept" | "process";
+  refType?: "concept" | "process" | "note";
   refId?: string;
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { NoteBlock, BlockType, BlockMeta, BLOCK_TYPE_CONFIG, CALLOUT_STYLES, Concept, Process } from "@/types";
+import { NoteBlock, BlockType, BlockMeta, BLOCK_TYPE_CONFIG, CALLOUT_STYLES, Concept, Process, Note } from "@/types";
 import { v4 as uuidv4 } from "uuid";
 
 interface NoteBlockEditorProps {
@@ -9,9 +9,10 @@ interface NoteBlockEditorProps {
     onChange: (blocks: NoteBlock[]) => void;
     concepts?: Concept[];
     processes?: Process[];
+    notes?: Note[];
 }
 
-export default function NoteBlockEditor({ blocks, onChange, concepts = [], processes = [] }: NoteBlockEditorProps) {
+export default function NoteBlockEditor({ blocks, onChange, concepts = [], processes = [], notes = [] }: NoteBlockEditorProps) {
     const [showTypePicker, setShowTypePicker] = useState(false);
     const [refSearch, setRefSearch] = useState("");
     const [refPickerFor, setRefPickerFor] = useState<string | null>(null);
@@ -77,7 +78,7 @@ export default function NoteBlockEditor({ blocks, onChange, concepts = [], proce
         updateMeta(blockId, { items });
     };
 
-    const selectReference = (blockId: string, refType: "concept" | "process", refId: string) => {
+    const selectReference = (blockId: string, refType: "concept" | "process" | "note", refId: string) => {
         updateMeta(blockId, { refType, refId });
         setRefPickerFor(null);
         setRefSearch("");
@@ -276,12 +277,14 @@ export default function NoteBlockEditor({ blocks, onChange, concepts = [], proce
                         {block.meta.refId ? (
                             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                                 <div style={{ flex: 1, padding: "8px 12px", background: "rgba(99, 102, 241, 0.08)", borderRadius: "8px", border: "1px solid rgba(99, 102, 241, 0.2)" }}>
-                                    <span style={{ fontSize: "10px", color: "#6366f1", fontWeight: 600, textTransform: "uppercase" }}>
-                                        {block.meta.refType === "concept" ? "📋 Concept" : "🔄 Process"}
+                                    <span style={{ fontSize: "10px", color: block.meta.refType === "concept" ? "#6366f1" : block.meta.refType === "note" ? "#8b5cf6" : "#f59e0b", fontWeight: 600, textTransform: "uppercase" }}>
+                                        {block.meta.refType === "concept" ? "📋 Concept" : block.meta.refType === "note" ? "📝 Note" : "🔄 Process"}
                                     </span>
                                     <p style={{ fontSize: "14px", fontWeight: 500, marginTop: "2px" }}>
                                         {block.meta.refType === "concept"
                                             ? concepts.find((c) => c.id === block.meta.refId)?.title || "Unknown concept"
+                                            : block.meta.refType === "note"
+                                            ? notes.find((n) => n.id === block.meta.refId)?.title || "Unknown note"
                                             : processes.find((p) => p.id === block.meta.refId)?.title || "Unknown process"}
                                     </p>
                                 </div>
@@ -301,7 +304,7 @@ export default function NoteBlockEditor({ blocks, onChange, concepts = [], proce
                                 className="btn btn-secondary btn-sm"
                                 style={{ fontSize: "13px" }}
                             >
-                                🔗 Select a concept or process...
+                                🔗 Select a concept, process, or note...
                             </button>
                         )}
 
@@ -337,8 +340,19 @@ export default function NoteBlockEditor({ blocks, onChange, concepts = [], proce
                                             {p.title}
                                         </div>
                                     ))}
+                                    {notes.filter((n) => n.title.toLowerCase().includes(refSearch.toLowerCase())).slice(0, 5).map((n) => (
+                                        <div
+                                            key={n.id}
+                                            onClick={() => selectReference(block.id, "note", n.id)}
+                                            style={{ padding: "8px", cursor: "pointer", borderBottom: "1px solid var(--color-border)", fontSize: "13px", display: "flex", gap: "6px", alignItems: "center" }}
+                                        >
+                                            <span style={{ color: "#8b5cf6", fontSize: "11px" }}>📝</span>
+                                            {n.title}
+                                        </div>
+                                    ))}
                                     {concepts.filter((c) => c.title.toLowerCase().includes(refSearch.toLowerCase())).length === 0 &&
-                                     processes.filter((p) => p.title.toLowerCase().includes(refSearch.toLowerCase())).length === 0 && (
+                                     processes.filter((p) => p.title.toLowerCase().includes(refSearch.toLowerCase())).length === 0 &&
+                                     notes.filter((n) => n.title.toLowerCase().includes(refSearch.toLowerCase())).length === 0 && (
                                         <p style={{ padding: "12px", color: "#5a5a78", fontSize: "13px", textAlign: "center" }}>No items found</p>
                                     )}
                                 </div>

@@ -186,7 +186,7 @@ export interface BlockMeta {
     style?: "info" | "warning" | "tip" | "important";
     listStyle?: "bullet" | "numbered";
     items?: string[];
-    refType?: "concept" | "process";
+    refType?: "concept" | "process" | "note";
     refId?: string;
 }
 
@@ -215,7 +215,7 @@ export const BLOCK_TYPE_CONFIG: Record<BlockType, { label: string; icon: string;
     callout: { label: "Callout", icon: "💡", description: "Highlighted box" },
     list: { label: "List", icon: "📋", description: "Bullet or numbered" },
     divider: { label: "Divider", icon: "──", description: "Separator" },
-    reference: { label: "Reference", icon: "🔗", description: "Link concept" },
+    reference: { label: "Reference", icon: "🔗", description: "Link concept, process, or note" },
     code: { label: "Code", icon: "💻", description: "Technical text" },
 };
 

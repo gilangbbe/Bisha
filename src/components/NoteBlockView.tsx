@@ -1,15 +1,16 @@
 "use client";
 
-import { NoteBlock, CALLOUT_STYLES, Concept, Process } from "@/types";
+import { NoteBlock, CALLOUT_STYLES, Concept, Process, Note } from "@/types";
 import Link from "next/link";
 
 interface NoteBlockViewProps {
     blocks: NoteBlock[];
     concepts?: Concept[];
     processes?: Process[];
+    notes?: Note[];
 }
 
-export default function NoteBlockView({ blocks, concepts = [], processes = [] }: NoteBlockViewProps) {
+export default function NoteBlockView({ blocks, concepts = [], processes = [], notes = [] }: NoteBlockViewProps) {
     const renderBlock = (block: NoteBlock) => {
         switch (block.type) {
             case "text":
@@ -85,8 +86,11 @@ export default function NoteBlockView({ blocks, concepts = [], processes = [] }:
             case "reference": {
                 if (!block.meta.refId) return null;
                 const isConcept = block.meta.refType === "concept";
+                const isNote = block.meta.refType === "note";
                 const item = isConcept
                     ? concepts.find((c) => c.id === block.meta.refId)
+                    : isNote
+                    ? notes.find((n) => n.id === block.meta.refId)
                     : processes.find((p) => p.id === block.meta.refId);
 
                 if (!item) {
@@ -97,21 +101,26 @@ export default function NoteBlockView({ blocks, concepts = [], processes = [] }:
                     );
                 }
 
-                const href = isConcept ? `/concepts/${item.id}` : `/processes/${item.id}`;
+                const href = isConcept ? `/concepts/${item.id}` : isNote ? `/notes/${item.id}` : `/processes/${item.id}`;
+                const bgColor = isConcept ? "rgba(99, 102, 241, 0.08)" : isNote ? "rgba(139, 92, 246, 0.08)" : "rgba(245, 158, 11, 0.08)";
+                const borderColor = isConcept ? "rgba(99, 102, 241, 0.2)" : isNote ? "rgba(139, 92, 246, 0.2)" : "rgba(245, 158, 11, 0.2)";
+                const labelColor = isConcept ? "#6366f1" : isNote ? "#8b5cf6" : "#f59e0b";
+                const labelText = isConcept ? "📋 Concept" : isNote ? "📝 Note" : "🔄 Process";
+
                 return (
                     <Link href={href} style={{ textDecoration: "none" }}>
                         <div
                             style={{
                                 padding: "10px 12px",
                                 borderRadius: "8px",
-                                background: isConcept ? "rgba(99, 102, 241, 0.08)" : "rgba(245, 158, 11, 0.08)",
-                                border: `1px solid ${isConcept ? "rgba(99, 102, 241, 0.2)" : "rgba(245, 158, 11, 0.2)"}`,
+                                background: bgColor,
+                                border: `1px solid ${borderColor}`,
                                 cursor: "pointer",
                                 transition: "background 0.15s",
                             }}
                         >
-                            <span style={{ fontSize: "10px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px", color: isConcept ? "#6366f1" : "#f59e0b" }}>
-                                {isConcept ? "📋 Concept" : "🔄 Process"}
+                            <span style={{ fontSize: "10px", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px", color: labelColor }}>
+                                {labelText}
                             </span>
                             <p style={{ fontSize: "14px", fontWeight: 500, color: "#f0f0f5", marginTop: "2px" }}>
                                 {item.title}

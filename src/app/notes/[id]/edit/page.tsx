@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { Note, NoteCategory, NOTE_CATEGORY_LABELS, NoteBlock, NoteFormData, Concept, Process } from "@/types";
-import { getNoteById, updateNote } from "@/lib/notes";
+import { getNoteById, updateNote, getAllNotes } from "@/lib/notes";
 import { getAllConcepts } from "@/lib/concepts";
 import { getAllProcesses } from "@/lib/processes";
 import NoteBlockEditor from "@/components/NoteBlockEditor";
@@ -20,6 +20,7 @@ export default function EditNotePage({
     const [saving, setSaving] = useState(false);
     const [concepts, setConcepts] = useState<Concept[]>([]);
     const [processes, setProcesses] = useState<Process[]>([]);
+    const [allNotes, setAllNotes] = useState<Note[]>([]);
 
     const [title, setTitle] = useState("");
     const [category, setCategory] = useState<NoteCategory>(NoteCategory.GENERAL);
@@ -29,10 +30,11 @@ export default function EditNotePage({
     useEffect(() => {
         async function load() {
             try {
-                const [note, c, p] = await Promise.all([
+                const [note, c, p, n] = await Promise.all([
                     getNoteById(id),
                     getAllConcepts(),
                     getAllProcesses(),
+                    getAllNotes(),
                 ]);
                 if (note) {
                     setTitle(note.title);
@@ -42,6 +44,8 @@ export default function EditNotePage({
                 }
                 setConcepts(c);
                 setProcesses(p);
+                // Exclude current note from reference picker
+                setAllNotes(n.filter((item) => item.id !== id));
             } catch (err) {
                 console.error(err);
             } finally {
@@ -191,6 +195,7 @@ export default function EditNotePage({
                         onChange={setBlocks}
                         concepts={concepts}
                         processes={processes}
+                        notes={allNotes}
                     />
                 </div>
 
